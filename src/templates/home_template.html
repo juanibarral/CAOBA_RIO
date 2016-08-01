@@ -1,0 +1,25 @@
+<md-toolbar layout="row">
+	<!-- <md-card>
+		<img src="../../images/logo_proyecto_300x100.png" class="md-card-image">
+	</md-card> -->
+	<span flex></span>
+	<md-button ng-click="logout()" class="fenicia_button">
+		logout
+	</md-button>
+</md-toolbar>
+<md-content id="content">
+	<div ng-controller="home_ctrl">
+		<md-tabs md-dynamic-height md-selected="selectedTab">
+			<md-tab label="{{tabs.tab_1.label}}">
+				<md-content class="md-fill">
+					<div ng-include="tabs.tab_1.template"></div>
+				</md-content>
+			</md-tab>
+			<md-tab label="{{tabs.tab_2.label}}">
+				<md-content class="md-fill">
+					<div ng-include="tabs.tab_2.template"></div>
+				</md-content>
+			</md-tab>
+		</md-tabs>
+	</div>
+</md-content>	

@@ -1,0 +1,18 @@
+<div layout="row" layout-align="center center" flex>
+	<md-whiteframe class="md-whiteframe-z1" layout="column" flex="20" layout-padding>
+		<!-- <md-card>
+			<img src="images/logo_proyecto_300x100.png" class="md-card-image">
+		</md-card> -->
+		<md-input-container>
+			<label>User</label>
+			<input ng-model="user.login">
+		</md-input-container>
+		<md-input-container>
+			<label>Password</label>
+			<input ng-model="user.password" type="password">
+		</md-input-container>
+		<md-button class="md-raised" flex="50" flex-sm="100" ng-click="login()">
+			Login
+		</md-button>
+	</md-whiteframe>
+</div>
