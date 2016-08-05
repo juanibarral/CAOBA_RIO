@@ -22,14 +22,14 @@ my_app.service('socket_srv', function(){
 	// * resp: response received from server
 	// * subscribers: object for all the templates using this service
 	var servicesList = {
-		GET_DATA : {
-			emit : 'get_data',
-			resp : 'data',
+		GET_LIST_OF_ROUTES : {
+			emit : 'get_list_of_routes',
+			resp : 'list_of_routes',
 			subscribers : {} 
 		},
-		GET_GEODATA : {
-			emit : 'get_geodata',
-			resp : 'geodata',
+		GET_ROUTE : {
+			emit : 'get_route',
+			resp : 'route',
 			subscribers : {} 
 		},
 	};

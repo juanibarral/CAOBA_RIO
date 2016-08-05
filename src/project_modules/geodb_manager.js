@@ -15,33 +15,83 @@ var geodb = require('geotabuladb');
  * @param {Object} params params for the query from client
  * @param {Object} callback function to return retrieved data 
  */
-var getGeoData = function(params, callback)
+var getRoute = function(_params, callback)
 {
+
+	var params = _params.params;
+
 	//Set credentials of geodatabase
-	/*
 	geodb.setCredentials({
 		type : 'postgis',
 		host : 'localhost',
-		user : 'user',
-		password : 'password',
-		database : 'MyGDB',
+		user : 'vafuser',
+		password : '1234',
+		database : 'CaobaRioDB',
 	});
-	
-	//Geoqueries....
+
+	var query = "SELECT ST_ASText(geom) as wkt FROM shapes WHERE shape_id='"+ params.route +"'"
+
+
 	geodb.geoQuery({
-			geometry : 'geom',
-			tableName : 'my_geometries',
-			properties : 'all',
+			querystring : query,
 			debug : true
 		}, function(json)
 		{
-			callback(json);		
+			//callback(pointsToLine(json));	
+			callback(json);
 		}
 	);
-	*/
-	callback("data from geodatabase");
+
+
+	//callback("data from geodatabase");
+};
+
+var pointsToLine = function(json)
+{
+	var line = {
+		type : "FeatureCollection",
+		features : []
+	}
+	var points = [];
+	var bbox = [
+		200, 
+		200, 
+		-200, 
+		-200, 
+	];
+	for(i in json.features)
+	{
+		var coords = json.features[i].geometry.coordinates 
+		points.push(coords);
+		if(coords[0] < bbox[0])
+			bbox[0] = coords[0];
+		if(coords[0] > bbox[2])
+			bbox[2] = coords[0];
+
+		if(coords[1] < bbox[1])
+			bbox[1] = coords[1];
+		if(coords[1] > bbox[3])
+			bbox[3] = coords[1];
+	}
+
+	var geometry = {
+		bbox : bbox,
+		type : "MultiLineString",
+		coordinates : points
+	}
+
+
+	var feature = {
+		"type" : "Feature",
+		"geometry" : geometry,
+		"properties" : {}
+	};
+
+	line.features.push(feature);
+
+	return line;
 };
 
 module.exports = {
-	getGeoData : getGeoData,
+	getRoute : getRoute,
 };

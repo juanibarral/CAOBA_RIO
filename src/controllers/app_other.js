@@ -10,7 +10,10 @@
 
 var my_app = require("./app_core").my_app;
 
-my_app.controller('other_ctrl', ['$scope', function($scope){
-	$scope.title = "My Other Template!!";
+my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket_srv){
+	$scope.title = "Nuevo mensaje";
+
+
+
 }]);
 

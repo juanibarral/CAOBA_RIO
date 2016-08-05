@@ -7,20 +7,42 @@
  * @Update_Author : Juan Camilo Ibarra
  * @Date: March 2016
  */
-
+var db = require('geotabuladb');
 
 /**
  * Function to get data from database 
  * @param {Object} params params for the query from client
  * @param {Object} callback function to return retrieved data
  */
-var getData = function(params, callback)
+var getListOfRoutes = function(params, callback)
 {
 	//Get something from your database
-	callback("some data from database");
+	db.setCredentials({
+		type : 'postgis',
+		host : 'localhost',
+		user : 'vafuser',
+		password : '1234',
+		database : 'CaobaRioDB',
+	});
+
+
+	var query = "SELECT shape_id FROM shapes GROUP By shape_id ORDER BY shape_id";
+	db.query({
+			querystring : query,
+			debug : true
+		}, function(_data)
+		{
+			var data = [];
+			for(i in _data)
+			{
+				data.push(_data[i].shape_id);
+			}
+			callback(data);		
+		}
+	);
 };
 
 
 module.exports = {
-	getData : getData
+	getListOfRoutes : getListOfRoutes,
 };

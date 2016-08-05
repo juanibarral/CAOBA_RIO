@@ -18,15 +18,15 @@ var io;
 // * resp: message send to client with response
 // * method: function to be called when receiving a message from client 
 var servicesList = {
-	GET_DATA : {
-		emit : 'get_data',
-		resp : 'data',
-		method : db.getData 
+	GET_LIST_OF_ROUTES : {
+		emit : 'get_list_of_routes',
+		resp : 'list_of_routes',
+		method : db.getListOfRoutes 
 	},
-	GET_GEODATA : {
-		emit : 'get_geodata',
-		resp : 'geodata',
-		method : geodb.getGeoData 
+	GET_ROUTE : {
+		emit : 'get_route',
+		resp : 'route',
+		method : geodb.getRoute
 	},
 };
 

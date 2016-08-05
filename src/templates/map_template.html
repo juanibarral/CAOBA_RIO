@@ -1,8 +1,18 @@
 <div ng-controller="map_ctrl" id="div_container_map">
 	<md-content layout="row">
-		<md-content layout="column" flex>
-			<h1>{{titles.map}}</h1>
+		<div layout="column" flex="80">
+			<h1>{{labels.map}}</h1>
 			<div id="my_map"></div>
-		</md-content>
+		</div>
+		<div layout="column" flex="20">
+			<md-input-container class="md-block" flex="60">
+				<label>{{labels.routes_list}}</label>
+				<md-select ng-model="currentRoute">
+					<md-option ng-repeat="u in routesList" value="{{u}}">
+						{{u}}
+					</md-option>
+				</md-select>
+			</md-input-container>
+		</div>
 	</md-content>
 </div>
