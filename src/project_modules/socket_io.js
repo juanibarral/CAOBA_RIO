@@ -28,6 +28,21 @@ var servicesList = {
 		resp : 'route',
 		method : geodb.getRoute
 	},
+	GET_ALL_ROUTES : {
+		emit : 'get_all_routes',
+		resp : 'all_routes',
+		method : geodb.getAllRoutes
+	},
+	GET_BUS_GPS_LINE : {
+		emit : 'get_bus_gps_line',
+		resp : 'bus_gps_line',
+		method : geodb.getBusGPSLine
+	},
+	GET_BUS_GPS_POINTS : {
+		emit : 'get_bus_gps_points',
+		resp : 'bus_gps_points',
+		method : geodb.getBusGPSPoints
+	},
 };
 
 /**

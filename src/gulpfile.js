@@ -157,6 +157,7 @@ gulp.task('concat_app_css', function(){
 			'./node_modules/angular-material/angular-material.css',
 			'./node_modules/leaflet/dist/leaflet.css',
 			'./node_modules/angular-material-data-table/dist/md-data-table.css',
+			'./node_modules/c3/c3.min.css',,
 			'./css/signin.css',
 			'./css/home.css'
 		])

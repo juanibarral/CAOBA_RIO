@@ -3,6 +3,10 @@
 	height : 600px;
 }
 
+#route_map{
+	height : 500px;
+}
+
 /*FOR INFO CONTROL ON MAP*/
 .info {
     padding: 6px 8px;
@@ -17,3 +21,20 @@
     color: #777;
 }
  
+
+ md-tabs.md-default-theme md-ink-bar, md-tabs md-ink-bar {
+	color : #B4B3B1;
+	background-color: #636360;
+}
+
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}

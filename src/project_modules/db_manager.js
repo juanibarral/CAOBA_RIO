@@ -19,7 +19,8 @@ var getListOfRoutes = function(params, callback)
 	//Get something from your database
 	db.setCredentials({
 		type : 'postgis',
-		host : 'localhost',
+		//host : 'localhost',
+		host : 'guitaca.uniandes.edu.co:5432',
 		user : 'vafuser',
 		password : '1234',
 		database : 'CaobaRioDB',

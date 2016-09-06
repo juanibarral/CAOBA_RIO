@@ -18,11 +18,18 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($r
 	
 	$scope.labels = {
 		map : "My map",	
-		routes_list : "Lista de rutas"
+		routes_list : "Lista de rutas",
+		loading : "Loading all routes...",
+		rendering : "Rendering all routes...",
+		load_button : "Load all routes"
 	}
 
+	$scope.lab_processing = $scope.labels.loading;
+
+	$scope.processing = false;
+
 	var center = [-22.727, -43.151];
-	var zoom = 10;
+	var zoom = 9;
 
 	var pointsMarker  = {
 	    radius: 4,
@@ -45,7 +52,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($r
 	tileOSM = new L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
 	tileOSMBW = new L.tileLayer.provider('OpenStreetMap.BlackAndWhite');
 	
-	myMap.addLayer(tileGoogleRoadmap);
+	myMap.addLayer(tileOSMBW);
 	layersControl.addBaseLayer(tileGoogleRoadmap, "Google maps (Roadmap)");
 	layersControl.addBaseLayer(tileGoogleHybrid, "Google maps (Hybrid)");
 	layersControl.addBaseLayer(tileOSM, "Open Street maps");
@@ -56,6 +63,17 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($r
 		position : 'bottomleft',
 		imperial: false
 	}).addTo(myMap);
+
+	var styleSelected = {
+		color : "#FFFF00",
+		weight: 3,
+	    opacity: 1
+	}
+	var styleUnselected = {
+		color : "#000000",
+		weight: 1,
+	    opacity: 0.8
+	}
 
   	var renderGeojsonPoints = function(geojson)
     {
@@ -69,9 +87,29 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($r
     var renderGeojson = function(geojson)
     {
     	var jsonLayer = L.geoJson(geojson,{
-    		
+    		onEachFeature : function(feature, layer){
+    			layer.setStyle(styleUnselected);
+    			layer.on({
+    				mouseover : highlightStructures,
+    				mouseout : resetHighlightStructures
+    			});
+    		}
     	}).addTo(myMap);
+    	console.log("End rendering");
+    	$scope.processing = false;
     }
+
+    var highlightStructures = function(e)
+	{
+		var layer = e.target;
+	    layer.setStyle(styleSelected);
+		layer.bringToFront();
+	};
+	
+	var resetHighlightStructures = function (e) {
+	    var layer = e.target;
+	    layer.setStyle(styleUnselected);	
+	};
 
 	$scope.currentRoute = [];
 
@@ -87,9 +125,9 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($r
 					},
 					callback : function(_data)
 					{
-						console.log(_data.data);
-						renderGeojsonPoints(_data.data);
-						//renderGeojson(_data.data);
+						//console.log(_data.data);
+						//renderGeojsonPoints(_data.data);
+						renderGeojson(_data.data);
 					}
 				}
 			);
@@ -98,17 +136,57 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($r
 
 	$scope.routesList = [];
 	
-	socket_srv.subscribe_callback(
-		socket_srv.services.GET_LIST_OF_ROUTES,
-		{
-			callback : function(_data)
-			{
-				var list = _data.data;
-				$scope.routesList = list;
-			}
-		}
-	);
+	// socket_srv.subscribe_callback(
+	// 	socket_srv.services.GET_LIST_OF_ROUTES,
+	// 	{
+	// 		callback : function(_data)
+	// 		{
+	// 			var list = _data.data;
+	// 			$scope.routesList = list;
+	// 			for(var i= 0; i < 500; i++)
+	// 			{
+	// 				var route = $scope.routesList[i];
+	// 				socket_srv.subscribe_callback(
+	// 					socket_srv.services.GET_ROUTE,
+	// 					{
+	// 						params : {
+	// 							route : route
+	// 						},
+	// 						callback : function(_data)
+	// 						{
+	// 							console.log(_data.data);
+	// 							//renderGeojsonPoints(_data.data);
+	// 							renderGeojson(_data.data);
+	// 						}
+	// 					}
+	// 				);	
+	// 			}
+				
+	// 		}
+	// 	}
+	// );
+	
+	//infoControl.addTo(myMap);
 
-    //infoControl.addTo(myMap);
+    $scope.loadAllRoutes = function()
+    {
+    	$scope.processing = true;
+		socket_srv.subscribe_callback(
+			socket_srv.services.GET_ALL_ROUTES,
+			{
+				params : {
+					
+				},
+				callback : function(_data)
+				{
+					$scope.lab_processing = $scope.labels.rendering;
+					//console.log("Received from server, rendering");
+
+					//renderGeojsonPoints(_data.data);
+					renderGeojson(_data.data);
+				}
+			}
+		);
+    }
 }]);
 

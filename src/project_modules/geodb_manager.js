@@ -10,6 +10,20 @@
 
 var geodb = require('geotabuladb');
 
+var all_routes_cache = null;
+
+var connect = function()
+{
+	geodb.setCredentials({
+		type : 'postgis',
+		host : 'localhost',
+		//host : 'guitaca.uniandes.edu.co:5432',
+		user : 'vafuser',
+		password : '1234',
+		database : 'CaobaRioDB',
+	});
+}
+
 /**
  * Function to get geodata from geodatabse
  * @param {Object} params params for the query from client
@@ -21,13 +35,7 @@ var getRoute = function(_params, callback)
 	var params = _params.params;
 
 	//Set credentials of geodatabase
-	geodb.setCredentials({
-		type : 'postgis',
-		host : 'localhost',
-		user : 'vafuser',
-		password : '1234',
-		database : 'CaobaRioDB',
-	});
+	connect();
 
 	var query = "SELECT ST_ASText(geom) as wkt FROM shapes WHERE shape_id='"+ params.route +"'"
 
@@ -37,14 +45,87 @@ var getRoute = function(_params, callback)
 			debug : true
 		}, function(json)
 		{
-			//callback(pointsToLine(json));	
-			callback(json);
+			callback(pointsToLine(json));	
+			//callback(json);
 		}
 	);
-
-
 	//callback("data from geodatabase");
 };
+
+
+var getBusGPSLine = function(_params, callback)
+{
+
+	var params = _params.params;
+
+	params["bus_id"] = 'B58703';
+	//Set credentials of geodatabase
+	connect();
+
+	var query = "SELECT ST_ASText(geom) as wkt FROM gps_725_2016_04_08_shape_id_17343692 WHERE bus_identi = '"+ params.bus_id+"' ORDER BY gps_dateti"
+
+
+	geodb.geoQuery({
+			querystring : query,
+			debug : true
+		}, function(json)
+		{
+			callback(pointsToLine(json));	
+			//callback(json);
+		}
+	);
+	//callback("data from geodatabase");
+};
+
+
+var getBusGPSPoints = function(_params, callback)
+{
+
+	var params = _params.params;
+
+	params["bus_id"] = 'B58703';
+	//Set credentials of geodatabase
+	connect();
+
+	var query = "SELECT *, ST_ASText(geom) as wkt FROM gps_725_2016_04_08_shape_id_17343692 WHERE bus_identi = '"+ params.bus_id+"' ORDER BY gps_dateti"
+
+
+	geodb.query({
+			querystring : query,
+			debug : true
+		}, function(data)
+		{
+			callback(data);	
+			//callback(json);
+		}
+	);
+	//callback("data from geodatabase");
+};
+
+
+var getAllRoutes = function(_params, callback)
+{
+
+	// if(all_routes_cache != null)
+	// {
+	// 	callback(all_routes_cache);
+	// }
+	// else
+	// {
+		connect();
+
+		geodb.geoQuery({
+				geometry : "route",
+				tableName : "all_routes_ordered",
+				properties : "all",
+				debug : true
+			}, function(json){
+				all_routes_cache = json;
+				callback(all_routes_cache);
+			}
+		);
+	// }
+}
 
 var pointsToLine = function(json)
 {
@@ -77,7 +158,7 @@ var pointsToLine = function(json)
 	var geometry = {
 		bbox : bbox,
 		type : "MultiLineString",
-		coordinates : points
+		coordinates : [points]
 	}
 
 
@@ -94,4 +175,7 @@ var pointsToLine = function(json)
 
 module.exports = {
 	getRoute : getRoute,
+	getAllRoutes : getAllRoutes,
+	getBusGPSLine : getBusGPSLine,
+	getBusGPSPoints : getBusGPSPoints,
 };

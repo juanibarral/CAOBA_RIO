@@ -5,14 +5,8 @@
 			<div id="my_map"></div>
 		</div>
 		<div layout="column" flex="20">
-			<md-input-container class="md-block" flex="60">
-				<label>{{labels.routes_list}}</label>
-				<md-select ng-model="currentRoute">
-					<md-option ng-repeat="u in routesList" value="{{u}}">
-						{{u}}
-					</md-option>
-				</md-select>
-			</md-input-container>
+			<md-button class="md-accent" ng-click="loadAllRoutes()">{{labels.load_button}}</md-button>
+			<h3 ng-show="processing">{{lab_processing}}</h3>
 		</div>
 	</md-content>
 </div>

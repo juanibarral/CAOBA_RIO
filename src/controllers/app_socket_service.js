@@ -32,6 +32,21 @@ my_app.service('socket_srv', function(){
 			resp : 'route',
 			subscribers : {} 
 		},
+		GET_ALL_ROUTES : {
+			emit : 'get_all_routes',
+			resp : 'all_routes',
+			subscribers : {} 
+		},
+		GET_BUS_GPS_LINE : {
+			emit : 'get_bus_gps_line',
+			resp : 'bus_gps_line',
+			subscribers : {} 
+		},
+		GET_BUS_GPS_POINTS : {
+			emit : 'get_bus_gps_points',
+			resp : 'bus_gps_points',
+			subscribers : {} 
+		},
 	};
 	/**
 	 * Sets the listener for each service
