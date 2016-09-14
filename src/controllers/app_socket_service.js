@@ -47,6 +47,26 @@ my_app.service('socket_srv', function(){
 			resp : 'bus_gps_points',
 			subscribers : {} 
 		},
+		GET_BUSES_FROM_ROUTE : {
+			emit : 'get_buses_from_route',
+			resp : 'buses_from_route',
+			subscribers : {} 
+		},
+		GET_NEIGHBORHOODS : {
+			emit : 'get_neighborhoods',
+			resp : 'neighborhoods',
+			subscribers : {} 
+		},
+		GET_NEIGHBORHOODS_DATA : {
+			emit : 'get_neighborhoods_data',
+			resp : 'neighborhoods_data',
+			subscribers : {} 
+		},
+		GET_ROUTES_FROM_NEIGHBORHOODS : {
+			emit : 'get_routes_from_neighborhoods',
+			resp : 'routes_from_neighborhoods',
+			subscribers : {} 
+		}
 	};
 	/**
 	 * Sets the listener for each service

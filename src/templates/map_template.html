@@ -5,8 +5,12 @@
 			<div id="my_map"></div>
 		</div>
 		<div layout="column" flex="20">
-			<md-button class="md-accent" ng-click="loadAllRoutes()">{{labels.load_button}}</md-button>
-			<h3 ng-show="processing">{{lab_processing}}</h3>
+			<!-- <md-button class="md-raised md-primary" ng-click="loadAllRoutes()">{{labels.load_button}}</md-button> -->
+			<div layout= "column" ng-show="processing">
+				<h4 >{{lab_processing}}</h4>
+				<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+			</div>
+			
 		</div>
 	</md-content>
 </div>

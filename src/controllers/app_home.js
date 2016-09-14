@@ -13,11 +13,11 @@ var my_app = require("./app_core").my_app;
 my_app.controller('home_ctrl', ['$scope', '$location', function($scope, $location){
 	$scope.tabs = {
 		tab_1 : {
-			label : "Tab_1",
+			label : "Bus routes",
 			template : "../../templates/map_template.html"
 		},
 		tab_2 : {
-			label : "Tab_2",
+			label : "Route 725",
 			template : "../../templates/other_template.html"
 		},
 	};
