@@ -35,6 +35,7 @@ gulp.task('browserify_debug', function () {
 		'./controllers/app_home.js',
 		'./controllers/app_login.js',
 		'./controllers/app_socket_service.js',
+		'./controllers/app_rest_service.js',
 		'./controllers/app_map.js',
 		'./controllers/app_other.js',
     ],

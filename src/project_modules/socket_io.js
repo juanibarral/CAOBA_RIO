@@ -43,6 +43,26 @@ var servicesList = {
 		resp : 'bus_gps_points',
 		method : geodb.getBusGPSPoints
 	},
+	GET_BUSES_FROM_ROUTE : {
+		emit : 'get_buses_from_route',
+		resp : 'buses_from_route',
+		method : geodb.getBusesList
+	},
+	GET_NEIGHBORHOODS : {
+		emit : 'get_neighborhoods',
+		resp : 'neighborhoods',
+		method : geodb.getNeighborhoods	
+	},
+	GET_NEIGHBORHOODS_DATA : {
+		emit : 'get_neighborhoods_data',
+		resp : 'neighborhoods_data',
+		method : geodb.getNeighborhoodsData
+	},
+	GET_ROUTES_FROM_NEIGHBORHOODS : {
+		emit : 'get_routes_from_neighborhoods',
+		resp : 'routes_from_neighborhoods',
+		method : geodb.getRoutesFromNeighborhood
+	}
 };
 
 /**

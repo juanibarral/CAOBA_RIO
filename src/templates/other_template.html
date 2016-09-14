@@ -1,16 +1,31 @@
 <div ng-controller="other_ctrl">
 	<md-content layout="column">
 		<h1>{{title}}</h1>
+		<div layout="row" layout-padding>
+			<div flex = "20">				
+				<label>{{labels.select_bus}}</label>
+				<md-select ng-model="selectedBus">
+					<md-option ng-repeat="u in buses" value="{{u}}">
+						{{u}}
+					</md-option>
+				</md-select>
+			</div>
+			<div layout="row" ng-show="loading">
+				<h4>Loading please wait...</h4>
+				<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+			</div>
+			<h4>{{current_date}}</h4>
+		</div>
 		<div layout="column" flex="100">
-			<h1>{{labels.map}}</h1>
 			<div id="route_map"></div>
 		</div>
 		<div layout="column" flex>
+			<!-- <h5>{{labels.slider}}</h5> -->
+			<!-- <md-slider class="md-primary" ng-model="pointIndex" min = "0" max = "{{route_points_counter}}" step = "1"></md-slider> -->
+			<h4>{{labels.vel_profile}}</h4>
 			<div id="chart_vel_profile"></div>
 		</div>
-		<div>
-			<md-slider ng-model="pointIndex" min = "0" max = "{{route_points_counter}}" step = "1"></md-slider>
-		</div>
+
 		
 	</md-content>
 </div>

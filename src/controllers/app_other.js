@@ -12,9 +12,29 @@ var my_app = require("./app_core").my_app;
 var d3 = require("d3");
 var c3 = require("c3");
 var colorbrewer = require("colorbrewer");
+require("datejs");
 
-my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket_srv){
+my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($scope, socket_srv, rest_srv){
+	
+	$scope.labels = {
+		select_bus : "Select bus",
+		vel_profile : "Velocity profile. (Hover for interaction)",
+		slider : "Use slider to move through time"
+	};
+
 	$scope.title = "Route 725";
+
+	$scope.loading = false;
+
+	$scope.buses = [];
+	$scope.selectedBus = [];
+
+	$scope.$watch("selectedBus", function(newVal){
+		if(newVal.length != 0)
+		{
+			loadBus(newVal);
+		}
+	});
 	
 	var chart_vel_profile;
 	var velocities = [];
@@ -38,7 +58,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	var infoControl = L.control();
 
 	var pointsMarker  = {
-	    radius: 4,
+	    radius: 6,
 	    fillColor: "#ff7800",
 	    color: "#000",
 	    weight: 1,
@@ -54,6 +74,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	    var f = d3.format(".2f");
 
 	    var valuesForLegend = [];
+
 	    valuesForLegend.push(min_vel + " - " + f(thresholdDomain[0]));
 	    for(var i = 0; i < numPoints - 2; i++)
 	    {
@@ -61,6 +82,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	    }
 		valuesForLegend.push(f(thresholdDomain[numPoints - 2]) + " - " + f(max_vel));
 	    
+	    div.innerHTML += '<h4>Velocity</h4>';
 	    for (var i = 0; i < colorMap.length; i++) {
 	        div.innerHTML +=
 	            '<i style="background:' + colorMap[i] + '"></i> ' +
@@ -68,6 +90,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	    }
 	    return div;
 	};
+	var legendLoaded = false;
 	
 
 	
@@ -75,8 +98,10 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	tileGoogleHybrid = new L.Google('HYBRID');
 	tileOSM = new L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png");
 	tileOSMBW = new L.tileLayer.provider('OpenStreetMap.BlackAndWhite');
+	tileESRIGray = new L.tileLayer.provider('Esri.WorldGrayCanvas');
 	
-	myMap.addLayer(tileOSMBW);
+	myMap.addLayer(tileESRIGray);
+	layersControl.addBaseLayer(tileESRIGray, "ESRI World Gray Canvas");
 	layersControl.addBaseLayer(tileGoogleRoadmap, "Google maps (Roadmap)");
 	layersControl.addBaseLayer(tileGoogleHybrid, "Google maps (Hybrid)");
 	layersControl.addBaseLayer(tileOSM, "Open Street maps");
@@ -90,22 +115,24 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 
 		
 	$scope.pointIndex = 0;
+	$scope.current_date = "";
 	var route_points = [];
 	var renderedPoints = [];
 
 	var numPoints = 5;
 
 	$scope.$watch("pointIndex", function(newVal, oldVal){
-		console.log(newVal);
+		//console.log(newVal);
 		if(route_points.length != 0)
 		{
 			if(newVal > numPoints)
 			{
+				$scope.current_date = route_points[newVal].gps_dateti;
 				for(i in renderedPoints)
 				{
 					myMap.removeLayer(renderedPoints[i]);
 				}
-				var min = parseInt(newVal - (numPoints/2));
+				var min = parseInt(newVal - numPoints);
 				var max = min + numPoints
 				for(var i = min ; i < max; i++)
 				{
@@ -118,10 +145,46 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 					renderedPoints.push(marker);
 				}
 				//chart_vel_profile.xgrids.remove();	
-				//chart_vel_profile.xgrids([{value: newVal, text: ""}]);	
+				var f = d3.timeFormat('%a %d %m %Y %H:%M:%S');
+				var d = Date.parse($scope.current_date, "yyyy-MM-dd HH:mm:ss");
+				var v = f(d);
+				//chart_vel_profile.xgrids([{value:d, text: ""}]);	
 			}
 		}
 	});
+
+	var updatePointsInMap = function(newVal)
+	{
+		if(newVal > numPoints)
+		{
+			$scope.current_date = route_points[newVal].gps_dateti;
+			for(i in renderedPoints)
+			{
+				myMap.removeLayer(renderedPoints[i]);
+			}
+			var min = parseInt(newVal - numPoints);
+			var max = min + numPoints
+			for(var i = min ; i < max; i++)
+			{
+				var point = route_points[i];
+				var wkt = point.wkt;
+				var vel = parseFloat(point.velocity);
+				pointsMarker.fillColor = colorScale(vel);
+				if(i == max - 1)
+					pointsMarker.weight = 3;
+				else
+					pointsMarker.weight = 1;
+				var latlng_raw = wkt.substring(6,wkt.length - 1).split(" ");	
+				var marker = L.circleMarker(L.latLng(parseFloat(latlng_raw[1]), parseFloat(latlng_raw[0])), pointsMarker).addTo(myMap);	
+				renderedPoints.push(marker);
+			}
+			//chart_vel_profile.xgrids.remove();	
+			var f = d3.timeFormat('%a %d %m %Y %H:%M:%S');
+			var d = Date.parse($scope.current_date, "yyyy-MM-dd HH:mm:ss");
+			var v = f(d);
+			//chart_vel_profile.xgrids([{value:d, text: ""}]);	
+		}
+	}
 
 	var geojsons = {};
 
@@ -221,66 +284,130 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	// 	}
 	// );
 
+	rest_srv.getBuses(
+		{
+			bus_identifier : 725,
+			date : "2016-04-22"
+		},
+		function(data){
+			console.log(data);
+		}
+	)
+
 	chart_vel_profile = c3.generate({
 		bindto : "#chart_vel_profile",
 		size : {
 			height : 200
 		},
 	    data: {
+	    	x : 'x',
 	        columns: [
-	        ]
+	        ],
+	        onmouseover : function(d)
+	        {
+	        	//console.log(d);
+				updatePointsInMap(d.index);
+	        }
 	    },
 	    point : {
 	    	show : false
 	    },
 	    transition : {
 			duration : 0
-		}
+		},
+		axis: {
+	        x: {
+	            type: 'timeseries',
+	            tick: {
+	                format: '%a %d %m %Y %H:%M:%S'
+	            }
+	        }
+	    },
+	    tooltip: {
+	        format: {
+	            value: function (value, ratio, id) {
+	            	var f = d3.format(".2f");
+	                return f(value);
+	            }
+	//            value: d3.format(',') // apply this format to both y and y2
+	        }
+	    }
 	});
 
 	var updateChartData = function()
 	{
-		var cols = [];
 		var vels = velocities;
 		vels.unshift("Velocity");
-		cols.push(vels);
+		
+
+		var cats = ["x"];
+		for(i in route_points)
+		{
+			var r = route_points[i];
+			var d = Date.parse(r.gps_dateti, "yyyy-MM-dd HH:mm:ss");
+
+			cats.push(d);
+		}
+
 		chart_vel_profile.load({
-			columns : cols
+			columns : [cats, vels]
 		});
 	}
 	
 
-	socket_srv.subscribe_callback(
-		socket_srv.services.GET_BUS_GPS_POINTS,
-		{
-			params : {
-				route : '17343692'
-			},
-			callback : function(_data)
-			{
-				//console.log(_data.data);
-				route_points = _data.data;
-				$scope.route_points_counter = route_points.length;
-				for(i in route_points)
-				{
-					velocities.push(parseFloat(route_points[i].velocity));
-				}
-				max_vel = d3.max(velocities);
-				min_vel = d3.min(velocities);
-				var vel_step = (max_vel - min_vel) / numPoints;
-				thresholdDomain = [];
-				for(var i = 1; i < numPoints; i++)
-				{
-					thresholdDomain.push(min_vel + (i * vel_step));
-				}
-				//renderGeojsonPoints(_data.data);
-				//renderGeojson({geojson : _data.data, type : 'gps', name :'B58703'});
-				colorScale = d3.scaleThreshold().domain(thresholdDomain).range(colorMap);
-				legend.addTo(myMap);
-				updateChartData();
+	// socket_srv.subscribe_callback(
+	// 	socket_srv.services.GET_BUSES_FROM_ROUTE,
+	// 	{
+	// 		callback : function(_data)
+	// 		{
+	// 			$scope.buses = _data.data;
+	// 		}
+	// 	}
+	// );
 
+	
+
+	var loadBus = function(bus_id)
+	{
+		$scope.title = "Route 725 - Bus " + bus_id;
+		$scope.loading = true;
+		socket_srv.subscribe_callback(
+			socket_srv.services.GET_BUS_GPS_POINTS,
+			{
+				params : {
+					bus_id : bus_id
+				},
+				callback : function(_data)
+				{
+					//console.log(_data.data);
+					velocities = [];
+					route_points = _data.data;
+					$scope.route_points_counter = route_points.length;
+					for(i in route_points)
+					{
+						velocities.push(parseFloat(route_points[i].velocity));
+					}
+					max_vel = d3.max(velocities);
+					min_vel = d3.min(velocities);
+					var vel_step = (max_vel - min_vel) / numPoints;
+					thresholdDomain = [];
+					for(var i = 1; i < numPoints; i++)
+					{
+						thresholdDomain.push(min_vel + (i * vel_step));
+					}
+					colorScale = d3.scaleThreshold().domain(thresholdDomain).range(colorMap);
+					if(legendLoaded)
+						myMap.removeControl(legend);
+					legend.addTo(myMap);
+					updateChartData();
+					legendLoaded = true;
+					$scope.loading = false;
+					$scope.pointIndex = 0;
+				}
 			}
-		}
-	);	
+		);
+	}
+
+		
 }]);
 

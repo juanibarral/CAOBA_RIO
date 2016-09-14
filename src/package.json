@@ -33,6 +33,7 @@
     "c3": "^0.4.11",
     "colorbrewer": "^1.0.0",
     "d3": "^4.2.2",
+    "datejs": "^1.0.0-rc3",
     "express": "^4.13.4",
     "geotabuladb": "^0.0.13",
     "leaflet": "^0.7.7",

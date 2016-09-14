@@ -16,8 +16,8 @@ var connect = function()
 {
 	geodb.setCredentials({
 		type : 'postgis',
-		host : 'localhost',
-		//host : 'guitaca.uniandes.edu.co:5432',
+		//host : 'localhost',
+		host : 'guitaca.uniandes.edu.co:5432',
 		user : 'vafuser',
 		password : '1234',
 		database : 'CaobaRioDB',
@@ -83,7 +83,7 @@ var getBusGPSPoints = function(_params, callback)
 
 	var params = _params.params;
 
-	params["bus_id"] = 'B58703';
+	
 	//Set credentials of geodatabase
 	connect();
 
@@ -96,10 +96,35 @@ var getBusGPSPoints = function(_params, callback)
 		}, function(data)
 		{
 			callback(data);	
-			//callback(json);
 		}
 	);
-	//callback("data from geodatabase");
+};
+
+var getBusesList = function(_params, callback)
+{
+
+	var params = _params.params;
+
+	
+	//Set credentials of geodatabase
+	connect();
+
+	var query = "SELECT bus_identi FROM gps_725_2016_04_08_shape_id_17343692 GROUP BY bus_identi"
+
+
+	geodb.query({
+			querystring : query,
+			debug : true
+		}, function(rows)
+		{
+			var data = [];
+			for(i in rows)
+			{
+				data.push(rows[i].bus_identi);
+			}
+			callback(data);	
+		}
+	);
 };
 
 
@@ -125,6 +150,69 @@ var getAllRoutes = function(_params, callback)
 			}
 		);
 	// }
+}
+
+var getNeighborhoods = function(_params, callback)
+{
+	connect();
+	geodb.geoQuery({
+			geometry : "geom",
+			tableName : "limites_barrios_wgs84",
+			properties : "all",
+			debug : true
+		}, function(json){
+			callback(json);
+		}
+	);
+}
+
+var getNeighborhoodsData = function(_params, callback)
+{
+	connect();
+	var query = "SELECT * FROM count_barrios_routes";
+	geodb.query({
+			querystring : query,
+			debug : true
+		}, function(rows){
+			var data = {};
+			for(i in rows)
+			{
+				var r = rows[i];
+				data[r.codbairro] = r.count;
+			}
+			callback(data);
+		}
+	);
+}
+
+var getRoutesFromNeighborhood = function(_params, callback)
+{
+	connect();
+
+	var params = _params.params;
+
+	var query = "SELECT all_routes_ordered.route " +
+				" FROM limites_barrios_wgs84, all_routes_ordered " +
+				" WHERE limites_barrios_wgs84.codbairro = '" + params.cod_barrio +"' AND ST_Intersects(limites_barrios_wgs84.geom, ST_GeomFromText(all_routes_ordered.route))"
+
+	// geodb.query({
+	// 		querystring : query, 
+	// 		debug : true
+	// 	}, function(rows){
+	// 		callback(rows);
+	// 	}
+	// );
+
+	geodb.geoQuery({
+		geometry : "route",
+		properties : "all_routes_ordered.route",
+		tableName : "limites_barrios_wgs84, all_routes_ordered",
+		where : "limites_barrios_wgs84.codbairro = '" + params.cod_barrio +"' AND ST_Intersects(limites_barrios_wgs84.geom, ST_GeomFromText(all_routes_ordered.route))",
+		debug : true,
+		}, function(data){
+			callback(data);
+		}
+	);
 }
 
 var pointsToLine = function(json)
@@ -178,4 +266,8 @@ module.exports = {
 	getAllRoutes : getAllRoutes,
 	getBusGPSLine : getBusGPSLine,
 	getBusGPSPoints : getBusGPSPoints,
+	getBusesList : getBusesList,
+	getNeighborhoods : getNeighborhoods,
+	getNeighborhoodsData : getNeighborhoodsData,
+	getRoutesFromNeighborhood : getRoutesFromNeighborhood
 };
