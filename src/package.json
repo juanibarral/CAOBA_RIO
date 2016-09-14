@@ -40,6 +40,7 @@
     "leaflet-plugins": "^1.5.0",
     "leaflet-providers": "^1.1.7",
     "socket.io": "^1.4.5",
+    "socket.io-client": "^1.4.8",
     "tabulalogin": "^1.0.0"
   }
 }

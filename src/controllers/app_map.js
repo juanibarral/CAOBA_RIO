@@ -16,7 +16,7 @@ var colorbrewer = require("colorbrewer");
 var d3 = require("d3");
 var my_app = require("./app_core").my_app;
 
-my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', function($rootScope, $scope, socket_srv){
+my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($rootScope, $scope, socket_srv){
 	
 	$scope.labels = {
 		map : "My map",	

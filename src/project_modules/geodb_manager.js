@@ -16,8 +16,8 @@ var connect = function()
 {
 	geodb.setCredentials({
 		type : 'postgis',
-		host : 'localhost',
-		//host : 'guitaca.uniandes.edu.co:5432',
+		//host : 'localhost',
+		host : 'guitaca.uniandes.edu.co:5432',
 		user : 'vafuser',
 		password : '1234',
 		database : 'CaobaRioDB',

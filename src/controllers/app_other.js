@@ -14,7 +14,7 @@ var c3 = require("c3");
 var colorbrewer = require("colorbrewer");
 require("datejs");
 
-my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket_srv){
+my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($scope, socket_srv, rest_srv){
 	
 	$scope.labels = {
 		select_bus : "Select bus",
@@ -284,6 +284,16 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	// 	}
 	// );
 
+	rest_srv.getBuses(
+		{
+			bus_identifier : 725,
+			date : "2016-04-22"
+		},
+		function(data){
+			console.log(data);
+		}
+	)
+
 	chart_vel_profile = c3.generate({
 		bindto : "#chart_vel_profile",
 		size : {
@@ -345,15 +355,17 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', function($scope, socket
 	}
 	
 
-	socket_srv.subscribe_callback(
-		socket_srv.services.GET_BUSES_FROM_ROUTE,
-		{
-			callback : function(_data)
-			{
-				$scope.buses = _data.data;
-			}
-		}
-	);
+	// socket_srv.subscribe_callback(
+	// 	socket_srv.services.GET_BUSES_FROM_ROUTE,
+	// 	{
+	// 		callback : function(_data)
+	// 		{
+	// 			$scope.buses = _data.data;
+	// 		}
+	// 	}
+	// );
+
+	
 
 	var loadBus = function(bus_id)
 	{
