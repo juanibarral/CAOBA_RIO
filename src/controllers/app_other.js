@@ -357,67 +357,58 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
+   var routeName = 107;
+
 	rest_srv.getBuses(
 		{
-			route_name : 725,
+			route_name : routeName,
 			date : "2016-04-22"
 		},
 		function(data){
-			$scope.buses = data.msg.buses
+            var busesList = data.msg.buses;
+			var reA = /[^a-zA-Z]/g;
+			var reN = /[^0-9]/g;
+
+           	busesList.sort(function(a,b){
+					var aA = a.replace(reA, "");
+					var bA = b.replace(reA, "");
+					if(aA === bA) {
+						var aN = parseInt(a.replace(reN, ""), 10);
+						var bN = parseInt(b.replace(reN, ""), 10);
+						return aN === bN ? 0 : aN > bN ? 1 : -1;
+					} else {
+						return aA > bA ? 1 : -1;
+					}
+				}); 
+
+			$scope.buses = busesList;
+		    console.log('Sort list buses');
+			console.log($scope.buses);
 		}
 	)
 
 	var loadBus = function(bus_id)
 	{
-		$scope.title = "Route 725 - Bus " + bus_id;
+		$scope.title = "Route " + routeName + " - Bus " + bus_id;
 		$scope.loading = true;
-		// socket_srv.subscribe_callback(
-		// 	socket_srv.services.GET_BUS_GPS_POINTS,
-		// 	{
-		// 		params : {
-		// 			bus_id : bus_id
-		// 		},
-		// 		callback : function(_data)
-		// 		{
-		// 			//console.log(_data.data);
-		// 			velocities = [];
-		// 			route_points = _data.data;
-		// 			$scope.route_points_counter = route_points.length;
-		// 			for(i in route_points)
-		// 			{
-		// 				velocities.push(parseFloat(route_points[i].velocity));
-		// 			}
-		// 			max_vel = d3.max(velocities);
-		// 			min_vel = d3.min(velocities);
-		// 			var vel_step = (max_vel - min_vel) / numPoints;
-		// 			thresholdDomain = [];
-		// 			for(var i = 1; i < numPoints; i++)
-		// 			{
-		// 				thresholdDomain.push(min_vel + (i * vel_step));
-		// 			}
-		// 			colorScale = d3.scaleThreshold().domain(thresholdDomain).range(colorMap);
-		// 			if(legendLoaded)
-		// 				myMap.removeControl(legend);
-		// 			legend.addTo(myMap);
-		// 			updateChartData();
-		// 			legendLoaded = true;
-		// 			$scope.loading = false;
-		// 			$scope.pointIndex = 0;
-		// 		}
-		// 	}
-		// );
 
 		rest_srv.getBusData(
 			{
 				bus_identifier : bus_id,
 				date : "2016-04-22"
 			},function(data){
-				console.log(data);
-
-				//Sort data by date_time
-
+		
 				velocities = [];
 				route_points = data.msg.points;
+
+				route_points.sort(function(a,b){
+					return new Date(a.date_time) - new Date(b.date_time);
+				});
+
+
+				console.log('Sort points');
+				console.log(data);
+
 				$scope.route_points_counter = route_points.length;
 				for(i in route_points)
 				{
