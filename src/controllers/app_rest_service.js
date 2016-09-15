@@ -59,10 +59,37 @@ my_app.service('rest_srv', [ '$http', function($http){
 			callback
 		);
 	}
+
+	var getRoutesCount = function(params, callback){
+
+		postMessage(
+			{
+				method : "GET",
+				url : "http://172.24.99.172:8080/get_routes_count",
+			},
+			callback
+		);
+	}
+
+	var getRoutes = function(params, callback){
+
+		postMessage(
+			{
+				method : "GET",
+				url : "http://172.24.99.172:8080/get_routes",
+				params : {
+					identifier : params.identifier
+				}
+			},
+			callback
+		);
+	}
 	
 	return {
-		getBuses : getBuses, 
 		postMessage : postMessage,
+		getBuses : getBuses, 
 		getBusData : getBusData,
+		getRoutesCount:getRoutesCount,
+		getRoutes:getRoutes
 	};
 }]);

@@ -308,7 +308,11 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 					{
 						//console.log(_data.data);
 						//renderGeojsonPoints(_data.data);
-						renderGeojson(_data.data);
+
+						console.log('data of current Route by socket');
+				     	console.log(_data);
+					
+						renderGeojson(_data);
 					}
 				}
 			);
@@ -332,6 +336,10 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 					//console.log("Received from server, rendering");
 
 					//renderGeojsonPoints(_data.data);
+
+					console.log('data of all routes by socket');
+					console.log(_data);
+
 					renderGeojson(_data.data);
 				}
 			}
@@ -350,6 +358,9 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 					{
 						callback : function(_data)
 						{
+                         console.log('data of vecinos by socket');
+					     console.log(_data);
+
 							update_neighborhoods(_data.data);
 							$scope.processing = false;
 						}
