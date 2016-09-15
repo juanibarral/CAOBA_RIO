@@ -16,7 +16,7 @@ var colorbrewer = require("colorbrewer");
 var d3 = require("d3");
 var my_app = require("./app_core").my_app;
 
-my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($rootScope, $scope, socket_srv){
+my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv', function($rootScope, $scope, socket_srv, rest_srv){
 	
 	$scope.labels = {
 		map : "My map",	
@@ -339,6 +339,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
     }
 
 	$scope.processing = true;
+	/*
    	socket_srv.subscribe_callback(
 		socket_srv.services.GET_NEIGHBORHOODS,
 		{
@@ -358,8 +359,18 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 			}
 		}
 	);
+	//*/
 
-	
+	//TODO: llamar a los nuevos servicios
+	rest_srv.getDistrictData(
+	{
+
+	},
+	function(data)
+	{
+		//TODO Codificar la data para que sea como
+		//esta especificado en el wiki de github
+	})
 
 }]);
 

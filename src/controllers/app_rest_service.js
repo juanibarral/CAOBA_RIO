@@ -59,10 +59,18 @@ my_app.service('rest_srv', [ '$http', function($http){
 			callback
 		);
 	}
+
+	//TODO: Crear los otros dos servicios que piden la informacion al servicio REST
+	// Estos servicios retornan arreglos que hay que transformar en el controller
 	
+	var getDistrictData = function(params, callback){
+		// Terminar el codigo para traer la data de los barrios
+	}
+
 	return {
 		getBuses : getBuses, 
 		postMessage : postMessage,
 		getBusData : getBusData,
+		getDistrictData : getDistrictData
 	};
 }]);
