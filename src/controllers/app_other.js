@@ -412,12 +412,18 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 				bus_identifier : bus_id,
 				date : "2016-04-22"
 			},function(data){
-				console.log(data);
-
-				//Sort data by date_time
-
+		
 				velocities = [];
 				route_points = data.msg.points;
+
+				route_points.sort(function(a,b){
+					return new Date(a.date_time) - new Date(b.date_time);
+				});
+
+
+				console.log('Sort points');
+				console.log(data);
+
 				$scope.route_points_counter = route_points.length;
 				for(i in route_points)
 				{
