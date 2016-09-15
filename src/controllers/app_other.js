@@ -284,15 +284,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
-	rest_srv.getBuses(
-		{
-			bus_identifier : 725,
-			date : "2016-04-22"
-		},
-		function(data){
-			console.log(data);
-		}
-	)
+	
 
 	chart_vel_profile = c3.generate({
 		bindto : "#chart_vel_profile",
@@ -344,7 +336,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 		for(i in route_points)
 		{
 			var r = route_points[i];
-			var d = Date.parse(r.gps_dateti, "yyyy-MM-dd HH:mm:ss");
+			var d = Date.parse(r.date_time, "yyyy-MM-dd HH:mm:ss");
 
 			cats.push(d);
 		}
@@ -365,47 +357,89 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
-	
+	rest_srv.getBuses(
+		{
+			route_name : 725,
+			date : "2016-04-22"
+		},
+		function(data){
+			$scope.buses = data.msg.buses
+		}
+	)
 
 	var loadBus = function(bus_id)
 	{
 		$scope.title = "Route 725 - Bus " + bus_id;
 		$scope.loading = true;
-		socket_srv.subscribe_callback(
-			socket_srv.services.GET_BUS_GPS_POINTS,
+		// socket_srv.subscribe_callback(
+		// 	socket_srv.services.GET_BUS_GPS_POINTS,
+		// 	{
+		// 		params : {
+		// 			bus_id : bus_id
+		// 		},
+		// 		callback : function(_data)
+		// 		{
+		// 			//console.log(_data.data);
+		// 			velocities = [];
+		// 			route_points = _data.data;
+		// 			$scope.route_points_counter = route_points.length;
+		// 			for(i in route_points)
+		// 			{
+		// 				velocities.push(parseFloat(route_points[i].velocity));
+		// 			}
+		// 			max_vel = d3.max(velocities);
+		// 			min_vel = d3.min(velocities);
+		// 			var vel_step = (max_vel - min_vel) / numPoints;
+		// 			thresholdDomain = [];
+		// 			for(var i = 1; i < numPoints; i++)
+		// 			{
+		// 				thresholdDomain.push(min_vel + (i * vel_step));
+		// 			}
+		// 			colorScale = d3.scaleThreshold().domain(thresholdDomain).range(colorMap);
+		// 			if(legendLoaded)
+		// 				myMap.removeControl(legend);
+		// 			legend.addTo(myMap);
+		// 			updateChartData();
+		// 			legendLoaded = true;
+		// 			$scope.loading = false;
+		// 			$scope.pointIndex = 0;
+		// 		}
+		// 	}
+		// );
+
+		rest_srv.getBusData(
 			{
-				params : {
-					bus_id : bus_id
-				},
-				callback : function(_data)
+				bus_identifier : bus_id,
+				date : "2016-04-22"
+			},function(data){
+				console.log(data);
+
+				//Sort data by date_time
+
+				velocities = [];
+				route_points = data.msg.points;
+				$scope.route_points_counter = route_points.length;
+				for(i in route_points)
 				{
-					//console.log(_data.data);
-					velocities = [];
-					route_points = _data.data;
-					$scope.route_points_counter = route_points.length;
-					for(i in route_points)
-					{
-						velocities.push(parseFloat(route_points[i].velocity));
-					}
-					max_vel = d3.max(velocities);
-					min_vel = d3.min(velocities);
-					var vel_step = (max_vel - min_vel) / numPoints;
-					thresholdDomain = [];
-					for(var i = 1; i < numPoints; i++)
-					{
-						thresholdDomain.push(min_vel + (i * vel_step));
-					}
-					colorScale = d3.scaleThreshold().domain(thresholdDomain).range(colorMap);
-					if(legendLoaded)
-						myMap.removeControl(legend);
-					legend.addTo(myMap);
-					updateChartData();
-					legendLoaded = true;
-					$scope.loading = false;
-					$scope.pointIndex = 0;
+					velocities.push(parseFloat(route_points[i].velocity));
 				}
-			}
-		);
+				max_vel = d3.max(velocities);
+				min_vel = d3.min(velocities);
+				var vel_step = (max_vel - min_vel) / numPoints;
+				thresholdDomain = [];
+				for(var i = 1; i < numPoints; i++)
+				{
+					thresholdDomain.push(min_vel + (i * vel_step));
+				}
+				colorScale = d3.scaleThreshold().domain(thresholdDomain).range(colorMap);
+				if(legendLoaded)
+					myMap.removeControl(legend);
+				legend.addTo(myMap);
+				updateChartData();
+				legendLoaded = true;
+				$scope.loading = false;
+				$scope.pointIndex = 0;
+			})
 	}
 
 		
