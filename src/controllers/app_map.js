@@ -12,11 +12,13 @@ require('leaflet');
 require('../node_modules/leaflet-plugins/layer/tile/Google.js');
 require('leaflet-providers');
 require('angular-material-data-table');
+
+var dummyData = require('../images/count.js');
 var colorbrewer = require("colorbrewer");
 var d3 = require("d3");
 var my_app = require("./app_core").my_app;
 
-my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($rootScope, $scope, socket_srv){
+my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv', function($rootScope, $scope,socket_srv, rest_srv){
 	
 	$scope.labels = {
 		map : "My map",	
@@ -169,7 +171,11 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
     				mouseout : function(e){
 						var layer = e.target;
 						layer.setStyle(styleUnselected);	
-    				}
+    				},
+                   click : function (e){
+					   //e.target.feature.properties
+
+				   }
     			});
     		}
     	}).addTo(myMap);
@@ -181,6 +187,9 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
     var jsonLayerBase;
     var renderGeojsonBase = function(geojson)
     {
+		console.log('data geojson');
+		console.log(geojson);
+
     	jsonLayerBase = L.geoJson(geojson,{
     		onEachFeature : function(feature, layer){
     			layer.setStyle({
@@ -226,7 +235,8 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 	    }
 	    
 	};
-
+   
+   //show routes for barrio
 	var selectNeighborhood = function(e){
 		if(neighborSelected == 'none')
 		{
@@ -306,12 +316,6 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 					},
 					callback : function(_data)
 					{
-						//console.log(_data.data);
-						//renderGeojsonPoints(_data.data);
-
-						console.log('data of current Route by socket');
-				     	console.log(_data);
-					
 						renderGeojson(_data);
 					}
 				}
@@ -333,13 +337,6 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 				callback : function(_data)
 				{
 					$scope.lab_processing = $scope.labels.rendering;
-					//console.log("Received from server, rendering");
-
-					//renderGeojsonPoints(_data.data);
-
-					console.log('data of all routes by socket');
-					console.log(_data);
-
 					renderGeojson(_data.data);
 				}
 			}
@@ -347,7 +344,10 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
     }
 
 	$scope.processing = true;
-   	socket_srv.subscribe_callback(
+
+
+	//draw map
+  	socket_srv.subscribe_callback(
 		socket_srv.services.GET_NEIGHBORHOODS,
 		{
 			callback : function(_data)
@@ -358,9 +358,8 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 					{
 						callback : function(_data)
 						{
-                         console.log('data of vecinos by socket');
-					     console.log(_data);
-
+							console.log("data load map shape");
+                            console.log(_data.data);
 							update_neighborhoods(_data.data);
 							$scope.processing = false;
 						}
@@ -369,6 +368,111 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv',  function($
 			}
 		}
 	);
+
+/*
+			rest_srv.getRoutesCount(
+			{
+               
+			},function(data){
+
+				var geojson = builderGeojson(data);
+				renderGeojsonBase(geojson);
+
+			});
+*/
+/*console.log(dummyData);
+var geojson = builderGeojson({msg : dummyData.dummy});
+renderGeojsonBase(geojson);*/
+
+function builderGeojson(data){
+
+	/*console.log("reset Routes");	
+	console.log(data);*/	
+    var geoData = {};
+	var feature = [];
+    geoData.type ="FeatureCollection";
+
+    //recursivity count 
+   	for(var i = 0 ; i < data.msg.count.length;i++){
+	  var objData = {};  
+	  objData.type = "Feature";
+	  var geometryProperties = {};
+
+	  geometryProperties.district_code = data.msg.count[i].cod_ibge;
+	  geometryProperties.name = data.msg.count[i].reggov;
+	  geometryProperties.district_name = data.msg.count[i].municipio;
+	  geometryProperties.routes = data.msg.count[i].count;
+	  geometryProperties.id = data.msg.count[i].barrio;
+
+	  var geometryObj = {};
+	  geometryObj.coordinates = [];
+	  geometryObj.bbox = [];
+      geometryObj.type = "MultiPolygon";
+
+	  var maxX = null, minX = null;
+	  var maxY = null, minY = null; 
+     
+	 for(var j = 0 ; j < data.msg.count[i].shape.coordinates[0].length;j++){
+		 
+         var coordenate = [];
+		 coordenate = data.msg.count[i].shape.coordinates[0][j];
+        
+		if(maxX == null){
+         	maxX = coordenate[0]
+		}  else if(maxX< coordenate[0]){
+		   maxX = coordenate[0]; 
+	    }
+
+		if(maxY == null){
+         	maxY = coordenate[1]
+		} else if(maxY< coordenate[1]) {
+		   maxY = coordenate[1]; 
+		}
+          
+		if(minX == null){
+         	minX = coordenate[0]
+		}  else if(minX>coordenate[0]){
+		 	minX = coordenate[0]
+		}
+
+	    if(minY == null){
+         	minY = coordenate[1]
+		}  else if(minX>coordenate[1]){
+		 	minY = coordenate[1]
+		}
+
+         geometryObj.coordinates[j] = coordenate;
+
+      } 
+      
+	  geometryObj.bbox[0] = minX;
+	  geometryObj.bbox[1] = minY;
+	  geometryObj.bbox[2] = maxX;
+	  geometryObj.bbox[3] = maxY;
+
+      objData.properties = geometryProperties;
+      objData.geometry = geometryObj;
+	  feature[i] = objData;
+    } 
+    
+	geoData.feature = feature;
+
+	console.log("result builder");
+	console.log(geoData);
+
+    return geoData;
+}
+
+
+/*
+rest_srv.getRoutes(
+			{
+            	identifier : "57d8538d206bc36615d5a6d7"
+			},function(data){
+				Console.log("Route 57d8538d206bc36615d5a6d7");	
+				Console.log(data);	
+			})
+*/
 
 	
 

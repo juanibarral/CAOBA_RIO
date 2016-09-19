@@ -87,8 +87,8 @@ my_app.service('rest_srv', [ '$http', function($http){
 	
 	return {
 		postMessage : postMessage,
-		getBuses : getBuses, 
-		getBusData : getBusData,
+		getBuses : getBuses, //
+		getBusData : getBusData,//
 		getRoutesCount:getRoutesCount,
 		getRoutes:getRoutes
 	};

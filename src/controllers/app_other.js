@@ -357,7 +357,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
-   var routeName = 107;
+   var routeName = 725;
 
 	rest_srv.getBuses(
 		{
