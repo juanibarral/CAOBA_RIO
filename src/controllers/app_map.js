@@ -14,6 +14,8 @@ require('leaflet-providers');
 require('angular-material-data-table');
 
 var dummyData = require('../images/count.js');
+var dummyRoute = require('../images/Route.js');
+
 var colorbrewer = require("colorbrewer");
 var d3 = require("d3");
 var my_app = require("./app_core").my_app;
@@ -159,6 +161,9 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 
     var renderGeojson = function(geojson)
     {
+		console.log("geo data base");
+		console.log(geojson);
+
     	var jsonLayer = L.geoJson(geojson,{
     		onEachFeature : function(feature, layer){
     			layer.setStyle(styleUnselected);
@@ -347,27 +352,27 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 
 
 	//draw map
-  	socket_srv.subscribe_callback(
-		socket_srv.services.GET_NEIGHBORHOODS,
-		{
-			callback : function(_data)
-			{
-				renderGeojsonBase(_data.data);
-				socket_srv.subscribe_callback(
-					socket_srv.services.GET_NEIGHBORHOODS_DATA,
-					{
-						callback : function(_data)
-						{
-							console.log("data load map shape");
-                            console.log(_data.data);
-							update_neighborhoods(_data.data);
-							$scope.processing = false;
-						}
-					}
-				);
-			}
-		}
-	);
+  	// socket_srv.subscribe_callback(
+	// 	socket_srv.services.GET_NEIGHBORHOODS,
+	// 	{
+	// 		callback : function(_data)
+	// 		{
+	// 			renderGeojsonBase(_data.data);
+	// 			socket_srv.subscribe_callback(
+	// 				socket_srv.services.GET_NEIGHBORHOODS_DATA,
+	// 				{
+	// 					callback : function(_data)
+	// 					{
+	// 						console.log("data load map shape");
+    //                         console.log(_data.data);
+	// 						update_neighborhoods(_data.data);
+	// 						$scope.processing = false;
+	// 					}
+	// 				}
+	// 			);
+	// 		}
+	// 	}
+	// );
 
 /*
 			rest_srv.getRoutesCount(
@@ -380,14 +385,15 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 
 			});
 */
-/*console.log(dummyData);
+//console.log(dummyData);
+//
+var geojsonRoute = ({msg : dummyRoute.dummyRoute});
+
 var geojson = builderGeojson({msg : dummyData.dummy});
-renderGeojsonBase(geojson);*/
+renderGeojsonBase(geojson);
 
 function builderGeojson(data){
 
-	/*console.log("reset Routes");	
-	console.log(data);*/	
     var geoData = {};
 	var feature = [];
     geoData.type ="FeatureCollection";
@@ -405,6 +411,8 @@ function builderGeojson(data){
 	  geometryProperties.id = data.msg.count[i].barrio;
 
 	  var geometryObj = {};
+	  var coordinatesObj = [];
+
 	  geometryObj.coordinates = [];
 	  geometryObj.bbox = [];
       geometryObj.type = "MultiPolygon";
@@ -440,11 +448,12 @@ function builderGeojson(data){
 		}  else if(minX>coordenate[1]){
 		 	minY = coordenate[1]
 		}
-
-         geometryObj.coordinates[j] = coordenate;
+         coordinatesObj [j] =  coordenate;
+         //geometryObj.coordinates[j] = coordenate;
 
       } 
-      
+      geometryObj.coordinates[0] = coordinatesObj;
+	  
 	  geometryObj.bbox[0] = minX;
 	  geometryObj.bbox[1] = minY;
 	  geometryObj.bbox[2] = maxX;
@@ -455,7 +464,7 @@ function builderGeojson(data){
 	  feature[i] = objData;
     } 
     
-	geoData.feature = feature;
+	geoData.features = feature;
 
 	console.log("result builder");
 	console.log(geoData);
