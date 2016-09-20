@@ -254,7 +254,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	    layer.setStyle(styleUnselected);	
 	};
 
-    socket_srv.subscribe_callback(
+    /*socket_srv.subscribe_callback(
 		socket_srv.services.GET_ROUTE,
 		{
 			params : {
@@ -267,7 +267,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 				renderGeojson({geojson : _data.data, type : 'base'});
 			}
 		}
-	);	
+	);*/	
 
 	// socket_srv.subscribe_callback(
 	// 	socket_srv.services.GET_BUS_GPS_LINE,
@@ -357,35 +357,44 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
-   var routeName = 725;
+   //var routeName = 725;
 
-	rest_srv.getBuses(
-		{
-			route_name : routeName,
-			date : "2016-04-22"
-		},
-		function(data){
-            var busesList = data.msg.buses;
-			var reA = /[^a-zA-Z]/g;
-			var reN = /[^0-9]/g;
+   	$scope.$on("route_select", function (event,args){
+         routeName = 101;
+		 $scope.title = "Route " + routeName;
 
-           	busesList.sort(function(a,b){
-					var aA = a.replace(reA, "");
-					var bA = b.replace(reA, "");
-					if(aA === bA) {
-						var aN = parseInt(a.replace(reN, ""), 10);
-						var bN = parseInt(b.replace(reN, ""), 10);
-						return aN === bN ? 0 : aN > bN ? 1 : -1;
-					} else {
-						return aA > bA ? 1 : -1;
-					}
-				}); 
+		rest_srv.getBuses(
+			{
+				route_name : routeName,
+				date : "2016-04-22"
+			},
+			function(data){
+				var busesList = data.msg.buses;
+				var reA = /[^a-zA-Z]/g;
+				var reN = /[^0-9]/g;
 
-			$scope.buses = busesList;
-		    console.log('Sort list buses');
-			console.log($scope.buses);
-		}
-	)
+				/*busesList.sort(function(a,b){
+						var aA = a.replace(reA, "");
+						var bA = b.replace(reA, "");
+						if(aA === bA) {
+							var aN = parseInt(a.replace(reN, ""), 10);
+							var bN = parseInt(b.replace(reN, ""), 10);
+							return aN === bN ? 0 : aN > bN ? 1 : -1;
+						} else {
+							return aA > bA ? 1 : -1;
+						}
+					}); */
+
+
+				$scope.buses = busesList;
+				console.log('Sort list buses');
+				console.log($scope.buses);
+			}
+		)
+
+	});
+
+
 
 	var loadBus = function(bus_id)
 	{

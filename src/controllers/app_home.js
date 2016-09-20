@@ -26,4 +26,17 @@ my_app.controller('home_ctrl', ['$scope', '$location', function($scope, $locatio
 	{
 		$location.path('/login');
 	};
+	
+	$scope.$on("tab_select", function (event,args){
+         $scope.selectedTab = 1;
+		 $scope.$apply();
+	});
+
+	$scope.$on("changeLabel", function (event,args){
+         $scope.tabs.tab_2.label = "Routes +" + args;
+		 $scope.$apply();
+	});
+
+
+
 }]);
