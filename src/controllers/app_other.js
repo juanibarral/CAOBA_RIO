@@ -22,7 +22,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 		slider : "Use slider to move through time"
 	};
 
-	$scope.title = "Route 725";
+	$scope.title = "Route";
 
 	$scope.loading = false;
 
@@ -254,20 +254,20 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	    layer.setStyle(styleUnselected);	
 	};
 
-    /*socket_srv.subscribe_callback(
-		socket_srv.services.GET_ROUTE,
-		{
-			params : {
-				route : '17343692'
-			},
-			callback : function(_data)
-			{
-				//console.log(_data.data);
-				//renderGeojsonPoints(_data.data);
-				renderGeojson({geojson : _data.data, type : 'base'});
-			}
-		}
-	);*/	
+    // socket_srv.subscribe_callback(
+	// 	socket_srv.services.GET_ROUTE,
+	// 	{
+	// 		params : {
+	// 			route : '17343692'
+	// 		},
+	// 		callback : function(_data)
+	// 		{
+	// 			console.log("draw lline route");
+	// 			console.log(_data.data);
+	// 			renderGeojson({geojson : _data.data, type : 'base'});
+	// 		}
+	// 	}
+	// );
 
 	// socket_srv.subscribe_callback(
 	// 	socket_srv.services.GET_BUS_GPS_LINE,
@@ -360,8 +360,11 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
    //var routeName = 725;
 
    	$scope.$on("route_select", function (event,args){
-         routeName = 101;
+
+
+         routeName = args.properties.route_name;
 		 $scope.title = "Route " + routeName;
+	 	renderGeojson({geojson : args, type : 'base'});
 
 		rest_srv.getBuses(
 			{
@@ -373,7 +376,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 				var reA = /[^a-zA-Z]/g;
 				var reN = /[^0-9]/g;
 
-				/*busesList.sort(function(a,b){
+				busesList.sort(function(a,b){
 						var aA = a.replace(reA, "");
 						var bA = b.replace(reA, "");
 						if(aA === bA) {
@@ -383,7 +386,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 						} else {
 							return aA > bA ? 1 : -1;
 						}
-					}); */
+					}); 
 
 
 				$scope.buses = busesList;
@@ -413,7 +416,6 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 				route_points.sort(function(a,b){
 					return new Date(a.date_time) - new Date(b.date_time);
 				});
-
 
 				console.log('Sort points');
 				console.log(data);

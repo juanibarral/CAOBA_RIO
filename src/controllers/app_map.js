@@ -181,9 +181,12 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
     				},
                    click : function (e){
 					   var routesearch = e.target.feature.properties.route_name;
-					      $rootScope.$broadcast("tab_select");
+					   var routeLineString = e.target.feature;
+					   console.log("Linea Capturada");
+					   console.log(routeLineString);   
+						  $rootScope.$broadcast("tab_select");
 						  $rootScope.$broadcast("changeLabel",routesearch);
-                          $rootScope.$broadcast("route_select",routesearch);
+                          $rootScope.$broadcast("route_select",routeLineString);
 				   }
     			});
     		}

@@ -35,7 +35,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://172.24.99.172:8080/get_buses",
+				url : "http://localhost:8080/get_buses",
 				params : {
 					route_name : params.route_name,
 					date : params.date
@@ -50,7 +50,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://172.24.99.172:8080/get_bus_points",
+				url : "http://localhost:8080/get_bus_points",
 				params : {
 					bus_identifier : params.bus_identifier,
 					date : params.date
@@ -65,7 +65,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://172.24.99.172:8080/get_routes_count",
+				url : "http://localhost:8080/get_routes_count",
 			},
 			callback
 		);
