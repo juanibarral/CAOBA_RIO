@@ -151,9 +151,6 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 
   	var renderGeojsonPoints = function(geojson)
     {
-
-		//console.log("geo Points");
-		//console.log(geojson);
     	var jsonLayer = L.geoJson(geojson,{
     		pointToLayer : function(feature, latlng) {
     			return L.circleMarker(latlng, pointsMarker);
@@ -163,8 +160,6 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 
     var renderGeojson = function(geojson)
     {
-		//console.log("geo render");
-		//console.log(geojson);
 
     	var jsonLayer = L.geoJson(geojson,{
     		onEachFeature : function(feature, layer){
@@ -199,8 +194,6 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
     var jsonLayerBase;
     var renderGeojsonBase = function(geojson)
     {
-		//console.log('geojson Base');
-		//console.log(geojson);
 
     	jsonLayerBase = L.geoJson(geojson,{
     		onEachFeature : function(feature, layer){
@@ -256,21 +249,19 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 			console.log("draw routes for barrio");
 			$scope.processing = true;
 			var layer = e.target;
-			var codBarrio = layer.feature.properties.codbairro;
+
+			var codBarrio = layer.feature.properties.id;
 			neighborSelected = codBarrio;
          
-            var raw_data_line = builderGeojsonLine({msg : dummyRoute.dummyRoute});
-			renderGeojson(raw_data_line);
-
-			/*
+			
 			rest_srv.getRoutes(
 						{
-							cod_barrio : codBarrio
+							identifier : codBarrio
 						},function(data){
-							renderGeojson(_data.data);
-			// 				$scope.processing = false;
+				        	$scope.processing = false;
+							renderGeojson(builderGeojsonLine(data));
 						})
-			*/
+			
 
 
 			// socket_srv.subscribe_callback(
@@ -399,20 +390,21 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 	// );
 
 
-	// rest_srv.getRoutesCount(
-	// {
+	rest_srv.getRoutesCount(
+	{
 		
-	// },function(data){
+	},function(data){
 
-	// 	var geojson = builderGeojson(data);
-	// 	renderGeojsonBase(geojson);
+		var raw_data = builderGeojson(data);
+        renderGeojsonBase(raw_data.geojson);
+        update_neighborhoods(raw_data.data); 
 
-	// });
+	});
 
 
-var raw_data = builderGeojson({msg : dummyData.dummy});
+/*var raw_data = builderGeojson({msg : dummyData.dummy});
 renderGeojsonBase(raw_data.geojson);
-update_neighborhoods(raw_data.data);
+update_neighborhoods(raw_data.data);*/
 
 
 function builderGeojson(data){
@@ -424,7 +416,8 @@ function builderGeojson(data){
 
     //recursivity count 
    	for(var i = 0 ; i < data.msg.count.length;i++){
-      if((data.msg.count[i].municipio != "Oceano") ) {
+		   //remove ocenao and other region
+      if((data.msg.count[i].municipio != "Oceano")  && (data.msg.count[i].municipio != "Outro_Estado") ) {
 	    
 		var objData = {};  
 		objData.type = "Feature";
@@ -496,11 +489,8 @@ function builderGeojson(data){
 	
 	response.data = dataResult;
 	console.log("result data");
-	//console.log(response.data);
-
 	response.geojson = geoData;
-	//console.log("result builder");
-	//console.log(response);
+
     
     return response;
 }
@@ -576,9 +566,6 @@ function builderGeojsonLine(data){
     } 
     
 	geoData.features = feature;
-
-	console.log("result builder Line");
-	console.log(geoData);
 
     return geoData;
 }

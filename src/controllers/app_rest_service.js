@@ -9,6 +9,9 @@
  */
 
 var my_app = require("./app_core").my_app;
+//var urlBase = "http://localhost:8080";
+var urlBase = "http://172.24.99.172:8080";
+
 
 /**
  * Service to manage the socket connection with server  
@@ -35,7 +38,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://localhost:8080/get_buses",
+				url : urlBase + "/get_buses",
 				params : {
 					route_name : params.route_name,
 					date : params.date
@@ -50,7 +53,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://localhost:8080/get_bus_points",
+				url : urlBase + "/get_bus_points",
 				params : {
 					bus_identifier : params.bus_identifier,
 					date : params.date
@@ -65,7 +68,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://localhost:8080/get_routes_count",
+				url : urlBase + "/get_routes_count",
 			},
 			callback
 		);
@@ -76,7 +79,7 @@ my_app.service('rest_srv', [ '$http', function($http){
 		postMessage(
 			{
 				method : "GET",
-				url : "http://172.24.99.172:8080/get_routes",
+				url : urlBase + "/get_routes",
 				params : {
 					identifier : params.identifier
 				}
@@ -87,8 +90,8 @@ my_app.service('rest_srv', [ '$http', function($http){
 	
 	return {
 		postMessage : postMessage,
-		getBuses : getBuses, //
-		getBusData : getBusData,//
+		getBuses : getBuses, 
+		getBusData : getBusData,
 		getRoutesCount:getRoutesCount,
 		getRoutes:getRoutes
 	};

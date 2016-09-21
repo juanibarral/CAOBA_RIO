@@ -33,7 +33,7 @@ my_app.controller('home_ctrl', ['$scope', '$location', function($scope, $locatio
 	});
 
 	$scope.$on("changeLabel", function (event,args){
-         $scope.tabs.tab_2.label = "Routes +" + args;
+         $scope.tabs.tab_2.label = "Routes " + args;
 		 $scope.$apply();
 	});
 
