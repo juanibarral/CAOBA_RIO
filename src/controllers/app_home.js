@@ -17,7 +17,7 @@ my_app.controller('home_ctrl', ['$scope', '$location', function($scope, $locatio
 			template : "../../templates/map_template.html"
 		},
 		tab_2 : {
-			label : "Route 725",
+			label : "Route",
 			template : "../../templates/other_template.html"
 		},
 	};

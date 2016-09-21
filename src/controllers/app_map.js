@@ -22,8 +22,8 @@ var my_app = require("./app_core").my_app;
 
 my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv', function($rootScope, $scope,socket_srv, rest_srv){
 	
-	$scope.labels = {
-		map : "My map",	
+	$scope.labels = { 
+		map : "Rio Janeiro Routes by District",	
 		routes_list : "Lista de rutas",
 		loading : "Loading please wait...",
 		rendering : "Rendering please wait...",
@@ -174,15 +174,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 						var layer = e.target;
 						layer.setStyle(styleUnselected);	
     				},
-                   click : function (e){
-					   var routesearch = e.target.feature.properties.route_name;
-					   var routeLineString = e.target.feature;
-					   console.log("Linea Capturada");
-					   console.log(routeLineString);   
-						  $rootScope.$broadcast("tab_select");
-						  $rootScope.$broadcast("changeLabel",routesearch);
-                          $rootScope.$broadcast("route_select",routeLineString);
-				   }
+                   click : selectDistric
     			});
     		}
     	}).addTo(myMap);
@@ -241,7 +233,20 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 	    }
 	    
 	};
-   
+   //selectDristrict
+
+   var selectDistric = function(e){
+		var routesearch = e.target.feature.properties.route_name;
+		var routeLineString = e.target.feature;
+		//change tab
+		$rootScope.$broadcast("tab_select");
+		//change label tab
+		$rootScope.$broadcast("changeLabel",routesearch);
+		//update Route Map
+		$rootScope.$broadcast("route_select",routeLineString);
+   };
+
+
    //show routes for barrio
 	var selectNeighborhood = function(e){
 		if(neighborSelected == 'none')
@@ -345,7 +350,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 
 	$scope.routesList = [];
 
-    $scope.loadAllRoutes = function()
+   /* $scope.loadAllRoutes = function()
     {
     	$scope.processing = true;
 		socket_srv.subscribe_callback(
@@ -361,9 +366,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 				}
 			}
 		);
-    }
-
-	$scope.processing = true;
+    }*/
 
 
 	////draw map
@@ -389,6 +392,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 	// 	}
 	// );
 
+	$scope.processing = true;
 
 	rest_srv.getRoutesCount(
 	{
@@ -416,9 +420,11 @@ function builderGeojson(data){
 
     //recursivity count 
    	for(var i = 0 ; i < data.msg.count.length;i++){
-		   //remove ocenao and other region
-      if((data.msg.count[i].municipio != "Oceano")  && (data.msg.count[i].municipio != "Outro_Estado") ) {
-	    
+      if((data.msg.count[i].cod_ibge !=  "1") && (data.msg.count[i].barrio !=  "0")) {
+	    //57d8538a206bc36615d5a690
+		//57d85390206bc36615d5a6e9
+        //57d85399206bc36615d5a884
+
 		var objData = {};  
 		objData.type = "Feature";
 		var geometryProperties = {};
@@ -481,16 +487,15 @@ function builderGeojson(data){
 		objData.properties = geometryProperties;
 		objData.geometry = geometryObj;
 		feature[i] = objData;
-	 	
 	  }
     } 
-    
-	geoData.features = feature;
 	
+	geoData.features = feature;
 	response.data = dataResult;
-	console.log("result data");
 	response.geojson = geoData;
 
+	console.log("result data");
+	console.log(response);
     
     return response;
 }

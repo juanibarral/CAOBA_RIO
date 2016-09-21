@@ -48,7 +48,7 @@ my_app.run(['$rootScope', 'auth_srv', '$location', function($rootScope, auth_srv
 			console.log(response);
 			if(response.type == 'error')
 			{
-				$location.path('/login');
+				$location.path('/home');
 			}
 			else if(response.type == 'success')
 			{

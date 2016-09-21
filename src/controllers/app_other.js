@@ -122,7 +122,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	var numPoints = 5;
 
 	$scope.$watch("pointIndex", function(newVal, oldVal){
-		//console.log(newVal);
+		
 		if(route_points.length != 0)
 		{
 			if(newVal > numPoints)
