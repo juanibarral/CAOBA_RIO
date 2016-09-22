@@ -10,6 +10,14 @@
 					</md-option>
 				</md-select>
 			</div>
+
+		   <div flex = "20">
+			   <label>{{labels.date}}</label>
+			   <br><br>
+				<md-datepicker ng-model="myDate" md-placeholder="myDate"
+                  md-min-date="minDate" md-max-date="maxDate"></md-datepicker>
+			</div>
+
 			<div layout="row" ng-show="loading">
 				<h4>Loading please wait...</h4>
 				<md-progress-circular md-mode="indeterminate"></md-progress-circular>

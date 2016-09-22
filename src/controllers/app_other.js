@@ -12,12 +12,15 @@ var my_app = require("./app_core").my_app;
 var d3 = require("d3");
 var c3 = require("c3");
 var colorbrewer = require("colorbrewer");
+
+var routeName = null;
 require("datejs");
 
 my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($scope, socket_srv, rest_srv){
 	
 	$scope.labels = {
 		select_bus : "Select bus",
+		date : "Date",
 		vel_profile : "Velocity profile. (Hover for interaction)",
 		slider : "Use slider to move through time"
 	};
@@ -197,8 +200,18 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
     	}).addTo(myMap);
     };
 
+	var jsonLayerRoute = null;
+
+	function clearRoutes() {
+		myMap.removeLayer( jsonLayerRoute );
+	}
+
     var renderGeojson = function(params)
     {
+
+		if(jsonLayerRoute != null){
+			clearRoutes();
+		}
 
     	var styleSelected = {
 			color : "#FFFF00",
@@ -211,7 +224,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 		    opacity: 0.8
 		}
 
-    	var jsonLayer = L.geoJson(params.geojson,{
+    	jsonLayerRoute = L.geoJson(params.geojson,{
     		onEachFeature : function(feature, layer){
     			layer.setStyle(styleUnselected);
     			layer.on({
@@ -231,12 +244,12 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
     	$scope.processing = false;
     	if(params.type == 'base')
     	{
-    		myMap.fitBounds(jsonLayer.getBounds());
-    		geojsons['base'] = jsonLayer
+    		myMap.fitBounds(jsonLayerRoute.getBounds());
+    		geojsons['base'] = jsonLayerRoute
     	}
     	else if(params.type == 'gps')
     	{
-			geojsons[params.name] = jsonLayer
+			geojsons[params.name] = jsonLayerRoute
     	}
     		
 
@@ -330,8 +343,6 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	{
 		var vels = velocities;
 		vels.unshift("Velocity");
-		
-
 		var cats = ["x"];
 		for(i in route_points)
 		{
@@ -357,58 +368,101 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
-   //var routeName = 725;
 
+  var dateRoutes = "2016-03-22";
+
+	$scope.myDate = new Date(2016,03,22);
+
+  	$scope.minDate = new Date(
+      $scope.myDate.getFullYear(),
+      03,
+	  01);
+
+    $scope.maxDate = new Date(
+      $scope.myDate.getFullYear(),
+      04,
+      31);
+
+	$scope.$watch("myDate", function(newVal){
+		dateRoutes = formatDate(newVal.toString());
+		loadListBuses(routeName);
+		
+	})
+
+
+//load bus name for this date select
    	$scope.$on("route_select", function (event,args){
-
-
-         routeName = args.properties.route_name;
-		 $scope.title = "Route " + routeName;
-	 	renderGeojson({geojson : args, type : 'base'});
-
-		rest_srv.getBuses(
-			{
-				route_name : routeName,
-				date : "2016-04-22"
-			},
-			function(data){
-				var busesList = data.msg.buses;
-				var reA = /[^a-zA-Z]/g;
-				var reN = /[^0-9]/g;
-
-				busesList.sort(function(a,b){
-						var aA = a.replace(reA, "");
-						var bA = b.replace(reA, "");
-						if(aA === bA) {
-							var aN = parseInt(a.replace(reN, ""), 10);
-							var bN = parseInt(b.replace(reN, ""), 10);
-							return aN === bN ? 0 : aN > bN ? 1 : -1;
-						} else {
-							return aA > bA ? 1 : -1;
-						}
-					}); 
-
-
-				$scope.buses = busesList;
-				console.log('Sort list buses');
-				console.log($scope.buses);
-			}
-		)
-
+		chart_vel_profile.load({columns : [""]});
+		$scope.buses = [""];
+		routeName = args.properties.route_name;
+		$scope.title = "Route " + routeName;
+		renderGeojson({geojson : args, type : 'base'});
+		loadListBuses(routeName);
 	});
 
+	function formatDate(date) {
+		var d = new Date(date),
+			month = '' + (d.getMonth() + 1),
+			day = '' + d.getDate(),
+			year = d.getFullYear();
 
+		if (month.length < 2) month = '0' + month;
+		if (day.length < 2) day = '0' + day;
+
+		return [year, month, day].join('-');
+	}
+
+	function loadListBuses (nameRoute){
+		
+		rest_srv.getBuses(
+			{
+				route_name : nameRoute,
+				date : dateRoutes
+			},
+			function(data){	
+			console.log("status");
+			console.log(data.msg.hasOwnProperty(status));
+
+			try{
+					var busesList = data.msg.buses;
+					var reA = /[^a-zA-Z]/g;
+					var reN = /[^0-9]/g;
+
+					busesList.sort(function(a,b){
+							var aA = a.replace(reA, "");
+							var bA = b.replace(reA, "");
+							if(aA === bA) {
+								var aN = parseInt(a.replace(reN, ""), 10);
+								var bN = parseInt(b.replace(reN, ""), 10);
+								return aN === bN ? 0 : aN > bN ? 1 : -1;
+							} else {
+								return aA > bA ? 1 : -1;
+							}
+						}); 
+
+					$scope.buses = busesList;
+			}catch(err){
+                 console.log("undefine data list");
+			}
+		
+			}
+		);
+	
+	}
 
 	var loadBus = function(bus_id)
 	{
 		$scope.title = "Route " + routeName + " - Bus " + bus_id;
 		$scope.loading = true;
 
+        console.log("date Select");
+		console.log(dateRoutes);
+
 		rest_srv.getBusData(
 			{
 				bus_identifier : bus_id,
-				date : "2016-04-22"
-			},function(data){
+				date : dateRoutes
+				},function(data){
 		
 				velocities = [];
 				route_points = data.msg.points;
@@ -417,8 +471,8 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 					return new Date(a.date_time) - new Date(b.date_time);
 				});
 
-				console.log('Sort points');
-				console.log(data);
+				/*console.log('Sort points');
+				console.log(data);*/
 
 				$scope.route_points_counter = route_points.length;
 				for(i in route_points)
@@ -444,6 +498,6 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 			})
 	}
 
-		
+
 }]);
 

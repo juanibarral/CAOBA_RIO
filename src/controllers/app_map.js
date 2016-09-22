@@ -310,7 +310,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 		}
 
 		thresholdDomain = d3.ticks(min, max, 5);
-		colorMap = colorbrewer.YlOrBr[thresholdDomain.length + 1];
+		colorMap = colorbrewer.YlOrBr[thresholdDomain.length >= 8 ? 8 : thresholdDomain.length + 1];
 
 		// var v_step = (max - min) / numPoints;
 		// thresholdDomain = [];
@@ -450,7 +450,7 @@ function builderGeojson(data){
 		var coordinatesObj = [];
 
 		geometryObj.coordinates = [];
-		geometryObj.bbox = [];
+		//geometryObj.bbox = [];
 		geometryObj.type = "Polygon";
 
 		var maxX = null, minX = null;
@@ -461,7 +461,7 @@ function builderGeojson(data){
 			var coordenate = [];
 			coordenate = data.msg.count[i].shape.coordinates[0][j];
 			
-			if(maxX == null){
+			/*if(maxX == null){
 				maxX = coordenate[0]
 			}  else if(maxX< coordenate[0]){
 			maxX = coordenate[0]; 
@@ -483,15 +483,15 @@ function builderGeojson(data){
 				minY = coordenate[1]
 			}  else if(minX>coordenate[1]){
 				minY = coordenate[1]
-			}
+			}*/
 			coordinatesObj [j] =  coordenate;
 		} 
 		geometryObj.coordinates[0] = coordinatesObj;
 		
-		geometryObj.bbox[0] = minX;
+		/*geometryObj.bbox[0] = minX;
 		geometryObj.bbox[1] = minY;
 		geometryObj.bbox[2] = maxX;
-		geometryObj.bbox[3] = maxY;
+		geometryObj.bbox[3] = maxY;*/
 
 		objData.properties = geometryProperties;
 		objData.geometry = geometryObj;
@@ -502,9 +502,6 @@ function builderGeojson(data){
 	geoData.features = feature;
 	response.data = dataResult;
 	response.geojson = geoData;
-
-	console.log("result data");
-	console.log(response);
     
     return response;
 }
@@ -516,6 +513,8 @@ function builderGeojsonLine(data){
 
     var geoData = {};
 	var feature = [];
+	var coordinatesObj = [];
+
     geoData.type ="FeatureCollection";
 
     //recursivity count 
@@ -530,18 +529,18 @@ function builderGeojsonLine(data){
 	  var coordinatesObj = [];
 
 	  geometryObj.coordinates = [];
-	  geometryObj.bbox = [];
+	  //geometryObj.bbox = [];
       geometryObj.type = "LineString";
 
 	  var maxX = null, minX = null;
 	  var maxY = null, minY = null; 
      
-	 for(var j = 0 ; j < data.msg.rutas[i].points.coordinates.length;j++){
+	 for(var j = 0 ; j < data.msg.rutas[i].points.coordinates.length-5;j++){
 		 
          var coordenate = [];
 		 coordenate = data.msg.rutas[i].points.coordinates[j];
         
-		if(maxX == null){
+		/*if(maxX == null){
          	maxX = coordenate[0]
 		}  else if(maxX< coordenate[0]){
 		   maxX = coordenate[0]; 
@@ -563,16 +562,16 @@ function builderGeojsonLine(data){
          	minY = coordenate[1]
 		}  else if(minX>coordenate[1]){
 		 	minY = coordenate[1]
-		}
+		}*/
         geometryObj.coordinates[j] =  coordenate;
 
       } 
       //geometryObj.coordinates[0] = coordinatesObj;
 	  
-	  geometryObj.bbox[0] = minX;
+	  /*geometryObj.bbox[0] = minX;
 	  geometryObj.bbox[1] = minY;
 	  geometryObj.bbox[2] = maxX;
-	  geometryObj.bbox[3] = maxY;
+	  geometryObj.bbox[3] = maxY;**/
 
       objData.properties = geometryProperties;
       objData.geometry = geometryObj;
