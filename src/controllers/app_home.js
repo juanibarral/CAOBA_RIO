@@ -37,6 +37,4 @@ my_app.controller('home_ctrl', ['$scope', '$location', function($scope, $locatio
 		 $scope.$apply();
 	});
 
-
-
 }]);

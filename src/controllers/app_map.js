@@ -19,6 +19,7 @@ var dummyRoute = require('../images/route.js');
 var colorbrewer = require("colorbrewer");
 var d3 = require("d3");
 var my_app = require("./app_core").my_app;
+var jsonLayerLines;
 
 my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv', function($rootScope, $scope,socket_srv, rest_srv){
 	
@@ -161,7 +162,7 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
     var renderGeojson = function(geojson)
     {
 
-    	var jsonLayer = L.geoJson(geojson,{
+    	 jsonLayerLines = L.geoJson(geojson,{
     		onEachFeature : function(feature, layer){
     			layer.setStyle(styleUnselected);
     			layer.on({
@@ -174,13 +175,13 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 						var layer = e.target;
 						layer.setStyle(styleUnselected);	
     				},
-                   click : selectDistric
+                   click : selectRoute
     			});
     		}
     	}).addTo(myMap);
     	console.log("End rendering");
     	$scope.processing = false;
-    	jsonLayer.bringToFront();
+    	jsonLayerLines.bringToFront();
     }
 
     var jsonLayerBase;
@@ -233,9 +234,11 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 	    }
 	    
 	};
-   //selectDristrict
 
-   var selectDistric = function(e){
+
+   //selectRoute
+   var selectRoute = function(e){
+	
 		var routesearch = e.target.feature.properties.route_name;
 		var routeLineString = e.target.feature;
 		//change tab
@@ -244,12 +247,21 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 		$rootScope.$broadcast("changeLabel",routesearch);
 		//update Route Map
 		$rootScope.$broadcast("route_select",routeLineString);
+		//enable Click District 
+		neighborSelected = "none";
+		//clear routes
+		clearRoutes();
+	   
    };
 
 
+	function clearRoutes() {
+		myMap.removeLayer( jsonLayerLines );
+	}
+
    //show routes for barrio
 	var selectNeighborhood = function(e){
-		if(neighborSelected == 'none')
+		if(e.target.feature.properties.routes > 0 && neighborSelected == 'none')
 		{
 			console.log("draw routes for barrio");
 			$scope.processing = true;
@@ -258,17 +270,14 @@ my_app.controller('map_ctrl', ['$rootScope', '$scope', 'socket_srv', 'rest_srv',
 			var codBarrio = layer.feature.properties.id;
 			neighborSelected = codBarrio;
          
-			
 			rest_srv.getRoutes(
-						{
-							identifier : codBarrio
-						},function(data){
-				        	$scope.processing = false;
-							renderGeojson(builderGeojsonLine(data));
-						})
+				{
+					identifier : codBarrio
+				},function(data){
+					renderGeojson(builderGeojsonLine(data));
+					$scope.processing = false;
+				})
 			
-
-
 			// socket_srv.subscribe_callback(
 			// 	socket_srv.services.GET_ROUTES_FROM_NEIGHBORHOODS,
 			// 	{
