@@ -16,7 +16,7 @@ var colorbrewer = require("colorbrewer");
 var routeName = null;
 require("datejs");
 
-my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($scope, socket_srv, rest_srv, $mdDialog){
+my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', '$mdDialog', function($scope, socket_srv, rest_srv, $mdDialog){
 	
 	$scope.labels = {
 		select_bus : "Select bus",
@@ -459,7 +459,17 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 
 						$scope.buses = busesList;
 				}catch(err){
-					console.log("no route");
+					 
+					  $mdDialog.show(
+						$mdDialog.alert()
+							.parent(angular.element(document.querySelector('#popupContainer')))
+							.clickOutsideToClose(true)
+							.title('No buses for this route')
+							.textContent('switch to the selected date or route')
+							.ariaLabel('Alert Dialog Demo')
+							.ok('Got it!')
+							//.targetEvent(ev)
+						);
 				
 				}
 			
