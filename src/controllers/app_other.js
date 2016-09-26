@@ -16,7 +16,7 @@ var colorbrewer = require("colorbrewer");
 var routeName = null;
 require("datejs");
 
-my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($scope, socket_srv, rest_srv){
+my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($scope, socket_srv, rest_srv, $mdDialog){
 	
 	$scope.labels = {
 		select_bus : "Select bus",
@@ -133,7 +133,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 				$scope.current_date = route_points[newVal].gps_dateti;
 				for(i in renderedPoints)
 				{
-					myMap.removeLayer(renderedPoints[i]);
+				   clearLayer(renderedPoints[i]);
 				}
 				var min = parseInt(newVal - numPoints);
 				var max = min + numPoints
@@ -202,17 +202,12 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 
 	var jsonLayerRoute = null;
 
-	function clearRoutes() {
-		myMap.removeLayer( jsonLayerRoute );
+	function clearLayer(layer) {
+		myMap.removeLayer( layer );
 	}
 
     var renderGeojson = function(params)
     {
-
-		if(jsonLayerRoute != null){
-			clearRoutes();
-		}
-
     	var styleSelected = {
 			color : "#FFFF00",
 			weight: 3,
@@ -298,7 +293,6 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// );
 
 	
-
 	chart_vel_profile = c3.generate({
 		bindto : "#chart_vel_profile",
 		size : {
@@ -310,7 +304,6 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	        ],
 	        onmouseover : function(d)
 	        {
-	        	//console.log(d);
 				updatePointsInMap(d.index);
 	        }
 	    },
@@ -368,7 +361,7 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	// 	}
 	// );
 
-
+  //default date
   var dateRoutes = "2016-03-22";
 
 	$scope.myDate = new Date(2016,03,22);
@@ -392,11 +385,35 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 
 //load bus name for this date select
    	$scope.$on("route_select", function (event,args){
-		chart_vel_profile.load({columns : [""]});
+	
 		$scope.buses = [""];
 		routeName = args.properties.route_name;
 		$scope.title = "Route " + routeName;
+
+		 //clear Route
+		if(jsonLayerRoute != null){
+			clearLayer(jsonLayerRoute);
+		}
+		//clear poins
+         if(renderedPoints.length>0){
+			for(i in renderedPoints)
+				{
+				   clearLayer(renderedPoints[i]);
+				}	
+		}
+
+		// clear profile of velocity
+		chart_vel_profile.load({
+        columns: [
+            [""],    
+        ],
+            unload: chart_vel_profile.columns,
+        });
+
+		//draw route
 		renderGeojson({geojson : args, type : 'base'});
+
+		//load list of buses 
 		loadListBuses(routeName);
 	});
 
@@ -413,50 +430,62 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 	}
 
 	function loadListBuses (nameRoute){
-		
-		rest_srv.getBuses(
-			{
-				route_name : nameRoute,
-				date : dateRoutes
-			},
-			function(data){	
-			console.log("status");
-			console.log(data.msg.hasOwnProperty(status));
+		if(nameRoute != null){
+			rest_srv.getBuses(
+				{
+					route_name : nameRoute,
+					date : dateRoutes
+				},
+				function(data){	
+				console.log("status");
+				console.log(data.msg.hasOwnProperty(status));
 
-			try{
-					var busesList = data.msg.buses;
-					var reA = /[^a-zA-Z]/g;
-					var reN = /[^0-9]/g;
+				try{
+						var busesList = data.msg.buses;
+						var reA = /[^a-zA-Z]/g;
+						var reN = /[^0-9]/g;
 
-					busesList.sort(function(a,b){
-							var aA = a.replace(reA, "");
-							var bA = b.replace(reA, "");
-							if(aA === bA) {
-								var aN = parseInt(a.replace(reN, ""), 10);
-								var bN = parseInt(b.replace(reN, ""), 10);
-								return aN === bN ? 0 : aN > bN ? 1 : -1;
-							} else {
-								return aA > bA ? 1 : -1;
-							}
-						}); 
+						busesList.sort(function(a,b){
+								var aA = a.replace(reA, "");
+								var bA = b.replace(reA, "");
+								if(aA === bA) {
+									var aN = parseInt(a.replace(reN, ""), 10);
+									var bN = parseInt(b.replace(reN, ""), 10);
+									return aN === bN ? 0 : aN > bN ? 1 : -1;
+								} else {
+									return aA > bA ? 1 : -1;
+								}
+							}); 
 
-					$scope.buses = busesList;
-			}catch(err){
-                 console.log("undefine data list");
-			}
-		
-			}
-		);
-	
+						$scope.buses = busesList;
+				}catch(err){
+					console.log("no route");
+				
+				}
+			
+				}
+			);
+		}
 	}
+
+
+     /*$scope.showAlert = function(ev) {
+			    $mdDialog.show(
+				$mdDialog.alert()
+					.parent(angular.element(document.querySelector('#popupContainer')))
+					.clickOutsideToClose(true)
+					.title('Sorry!')
+					.textContent('this route does not have buses.')
+					.ariaLabel('Alert Dialog Demo')
+					.ok('Got it!')
+					.targetEvent(ev)
+   				 );
+			 }*/
 
 	var loadBus = function(bus_id)
 	{
 		$scope.title = "Route " + routeName + " - Bus " + bus_id;
 		$scope.loading = true;
-
-        console.log("date Select");
-		console.log(dateRoutes);
 
 		rest_srv.getBusData(
 			{
@@ -470,9 +499,6 @@ my_app.controller('other_ctrl', ['$scope', 'socket_srv', 'rest_srv', function($s
 				route_points.sort(function(a,b){
 					return new Date(a.date_time) - new Date(b.date_time);
 				});
-
-				/*console.log('Sort points');
-				console.log(data);*/
 
 				$scope.route_points_counter = route_points.length;
 				for(i in route_points)

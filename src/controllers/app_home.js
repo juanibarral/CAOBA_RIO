@@ -22,10 +22,10 @@ my_app.controller('home_ctrl', ['$scope', '$location', function($scope, $locatio
 		},
 	};
 	
-	$scope.logout = function()
+	/*$scope.logout = function()
 	{
 		$location.path('/login');
-	};
+	};*/
 	
 	$scope.$on("tab_select", function (event,args){
          $scope.selectedTab = 1;

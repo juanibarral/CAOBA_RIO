@@ -430,10 +430,7 @@ function builderGeojson(data){
     //recursivity count 
    	for(var i = 0 ; i < data.msg.count.length;i++){
       if((data.msg.count[i].cod_ibge !=  "1") && (data.msg.count[i].barrio !=  "0")) {
-	    //57d8538a206bc36615d5a690
-		//57d85390206bc36615d5a6e9
-        //57d85399206bc36615d5a884
-
+		  
 		var objData = {};  
 		objData.type = "Feature";
 		var geometryProperties = {};
